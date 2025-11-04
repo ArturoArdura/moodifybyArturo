@@ -323,7 +323,7 @@ export default function Index() {
           }}
         >
           <Text 
-            className="text-8xl font-extralight text-white mb-4" 
+            className="text-8xl font-extralight text-white mb-4 font-Gaegu-Light" 
             style={{ 
               textShadowColor: 'rgba(0,0,0,0.5)', 
               textShadowOffset: {width: 4, height: 4}, 
@@ -333,7 +333,7 @@ export default function Index() {
             Moodify
           </Text>
           <Animated.Text 
-            className="text-xl text-white/90 font-light tracking-widest"
+            className="text-xl text-white/90 font-light tracking-widest font-Gaegu-Regular"
             style={{
               textShadowColor: 'rgba(0,0,0,0.3)', 
               textShadowOffset: {width: 2, height: 2}, 
