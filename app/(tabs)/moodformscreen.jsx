@@ -256,9 +256,9 @@ export default function Moodformscreen() {
           >
             ¿Cómo te sientes?
           </Animated.Text>
-          <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+          <View >
             <Text className="text-xl text-white/90 font-medium">Selecciona tu mood</Text>
-          </Animated.View>
+          </View>
         </Animated.View>
 
         {/* Lista de moods con animaciones */}

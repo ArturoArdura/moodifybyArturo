@@ -9,7 +9,18 @@ export default function RootLayout() {
       <Tabs.Screen
         name="moodformscreen"
         options={{
-          headerShown: false,
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#667eea',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: '300',
+            fontSize: 28,
+            fontFamily: 'Gaegu-Light',
+            color: '#ffffff',
+          },
+          headerTitle: 'Moodify',
           title: "Registrar",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="add-circle" size={size} color={color} />
@@ -19,7 +30,18 @@ export default function RootLayout() {
       <Tabs.Screen
         name="historyscreen"
         options={{
-          headerShown: false,
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#667eea',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: '300',
+            fontSize: 28,
+            fontFamily: 'Gaegu-Light',
+            color: '#ffffff',
+          },
+          headerTitle: 'Moodify',
           title: "Historial",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="time" size={size} color={color} />
