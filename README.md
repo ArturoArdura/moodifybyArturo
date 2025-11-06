@@ -1,10 +1,22 @@
 # Moodify - Emotional Diary with Advanced Animations 
 
+<div align="center">
+
 A modern React Native application showcasing advanced animation techniques, theming systems, and Expo Router file-based navigation. Built as a portfolio piece to demonstrate expertise in mobile UI/UX development and smooth, performant animations.
 
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Expo](https://img.shields.io/badge/Expo-1B1F23?style=for-the-badge&logo=expo&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+
+<br/>
+
+<img src="./assets/gif/demo.gif" alt="Moodify App Demo" width="300" />
+
+<p><i>Fluid animations, dynamic theming, and modern UI/UX in action</i></p>
+
+</div>
+
+---
 
 ## 🎯 Project Overview
 
