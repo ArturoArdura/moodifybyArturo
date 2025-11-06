@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Platform, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { useTheme } from '../../context/ThemeContext';
@@ -7,8 +7,8 @@ import "../../global.css";
 
 export default function Moodformscreen() {
   const { colors } = useTheme();
-  const [selectedMood, setSelectedMood] = useState(null);
   const [lastMood, setLastMood] = useState('Ninguno');
+  const isAnimatingRef = useRef(false);
   
   // Animaciones
   const headerAnim = useRef(new Animated.Value(0)).current;
@@ -112,21 +112,37 @@ export default function Moodformscreen() {
 
   // Animar cuando cambia el lastMood
   useEffect(() => {
-    if (lastMood !== 'Ninguno') {
+    if (lastMood !== 'Ninguno' && !isAnimatingRef.current) {
+      isAnimatingRef.current = true;
+      
+      // Animación más fluida y natural
       Animated.sequence([
-        Animated.spring(footerScale, {
-          toValue: 1.15,
-          friction: 3,
+        // Pequeña escala hacia abajo (anticipación)
+        Animated.timing(footerScale, {
+          toValue: 0.95,
+          duration: 100,
           useNativeDriver: true,
         }),
+        // Rebote suave hacia arriba
+        Animated.spring(footerScale, {
+          toValue: 1.08,
+          friction: 4,
+          tension: 100,
+          useNativeDriver: true,
+        }),
+        // Regreso suave a escala normal
         Animated.spring(footerScale, {
           toValue: 1,
-          friction: 5,
+          friction: 6,
+          tension: 40,
           useNativeDriver: true,
         }),
-      ]).start();
+      ]).start(() => {
+        isAnimatingRef.current = false;
+      });
     }
-  }, [lastMood, footerScale]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastMood]);
 
   const handleContentSizeChange = (width, height) => {
     contentHeight.current = height;
@@ -145,11 +161,10 @@ export default function Moodformscreen() {
     { mood: "Cansado", emoji: "😴", color: Colors.moods.cansado.color, gradient: Colors.moods.cansado.gradient }
   ];
 
-  const handleMoodSelect = (item) => {
-    setSelectedMood(item.mood);
+  const handleMoodSelect = useCallback((item) => {
+    // Actualizar lastMood de forma simple y directa
     setLastMood(item.mood);
-    setTimeout(() => setSelectedMood(null), 300);
-  };
+  }, []);
 
   const Container = Platform.OS === 'ios' ? SafeAreaView : View;
 
@@ -157,59 +172,51 @@ export default function Moodformscreen() {
     const slideAnim = useRef(new Animated.Value(0)).current;
     const scaleAnim = useRef(new Animated.Value(0.5)).current;
     const rotateAnim = useRef(new Animated.Value(0)).current;
-    const bounceAnim = useRef(new Animated.Value(1)).current;
+    const hasAnimated = useRef(false);
 
     useEffect(() => {
-      // Animación de entrada
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 1,
-          duration: 600,
-          delay: index * 100,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          delay: index * 100,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // Animación sutil de flotación
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(rotateAnim, {
+      // Solo animar una vez, nunca volver a ejecutar
+      if (!hasAnimated.current) {
+        hasAnimated.current = true;
+        
+        // Animación de entrada
+        Animated.parallel([
+          Animated.timing(slideAnim, {
             toValue: 1,
-            duration: 3000 + (index * 200),
+            duration: 600,
+            delay: index * 100,
             useNativeDriver: true,
           }),
-          Animated.timing(rotateAnim, {
-            toValue: 0,
-            duration: 3000 + (index * 200),
+          Animated.spring(scaleAnim, {
+            toValue: 1,
+            delay: index * 100,
+            tension: 50,
+            friction: 7,
             useNativeDriver: true,
           }),
-        ])
-      ).start();
-    }, [index, scaleAnim, slideAnim, rotateAnim]);
+        ]).start();
+
+        // Animación sutil de flotación
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(rotateAnim, {
+              toValue: 1,
+              duration: 3000 + (index * 200),
+              useNativeDriver: true,
+            }),
+            Animated.timing(rotateAnim, {
+              toValue: 0,
+              duration: 3000 + (index * 200),
+              useNativeDriver: true,
+            }),
+          ])
+        ).start();
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handlePress = () => {
-      // Animación de rebote al presionar
-      Animated.sequence([
-        Animated.timing(bounceAnim, {
-          toValue: 0.95,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.spring(bounceAnim, {
-          toValue: 1,
-          friction: 3,
-          tension: 40,
-          useNativeDriver: true,
-        }),
-      ]).start();
-      
+      // Sin animación de rebote, solo llamar a handleMoodSelect
       handleMoodSelect(item);
     };
 
@@ -224,7 +231,7 @@ export default function Moodformscreen() {
                 outputRange: [-100, 0],
               }),
             },
-            { scale: Animated.multiply(scaleAnim, bounceAnim) },
+            { scale: scaleAnim },
             {
               translateY: rotateAnim.interpolate({
                 inputRange: [0, 0.5, 1],
@@ -257,22 +264,14 @@ export default function Moodformscreen() {
           >
             <Text className="text-5xl mr-4">{item.emoji}</Text>
             <Text className="text-3xl font-bold text-white flex-1">{item.mood}</Text>
-            {selectedMood === item.mood && (
-              <Animated.View
-                style={{
-                  transform: [{
-                    scale: slideAnim,
-                  }],
-                }}
-              >
-                <Text className="text-3xl text-white">✓</Text>
-              </Animated.View>
-            )}
           </LinearGradient>
         </TouchableOpacity>
       </Animated.View>
     );
   };
+
+  // Memoizar MoodItem para evitar re-renders innecesarios
+  const MemoizedMoodItem = memo(MoodItem);
 
   return (
     <LinearGradient 
@@ -354,7 +353,7 @@ export default function Moodformscreen() {
           <Animated.FlatList
             data={moodsje}
             contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
-            renderItem={({ item, index }) => <MoodItem item={item} index={index} />}
+            renderItem={({ item, index }) => <MemoizedMoodItem item={item} index={index} />}
             keyExtractor={(item) => item.mood}
             showsVerticalScrollIndicator={false}
             onScroll={Animated.event(
@@ -408,9 +407,11 @@ export default function Moodformscreen() {
         </View>
 
         {/* Footer con último mood */}
-        <View
-          
+        <Animated.View
           className="items-center pb-6 px-4 mt-4"
+          style={{
+            transform: [{ scale: footerScale }],
+          }}
         >
           <View 
             className="rounded-3xl px-8 py-4 border-2"
@@ -432,7 +433,7 @@ export default function Moodformscreen() {
             
           </View>
           
-        </View>
+        </Animated.View>
       </Container>
     </LinearGradient>
   );
