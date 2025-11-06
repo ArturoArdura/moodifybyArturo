@@ -1,9 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, FlatList, Platform, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Platform, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { Colors } from '../../constants/Colors';
+import { useTheme } from '../../context/ThemeContext';
 import "../../global.css";
 
 export default function Moodformscreen() {
+  const { colors } = useTheme();
   const [selectedMood, setSelectedMood] = useState(null);
   const [lastMood, setLastMood] = useState('Ninguno');
   
@@ -13,6 +16,11 @@ export default function Moodformscreen() {
   const footerAnim = useRef(new Animated.Value(0)).current;
   const footerScale = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
+  const scrollIndicatorTopAnim = useRef(new Animated.Value(0)).current;
+  const scrollIndicatorBottomAnim = useRef(new Animated.Value(1)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const contentHeight = useRef(0);
+  const layoutHeight = useRef(0);
 
   useEffect(() => {
     // Animación del header
@@ -61,7 +69,46 @@ export default function Moodformscreen() {
         }),
       ])
     ).start();
-  }, [headerAnim, pulseAnim, footerAnim, glowAnim]);
+
+    // Listener para actualizar indicadores de scroll basado en scrollY
+    const listenerId = scrollY.addListener(({ value }) => {
+      const scrollPosition = value;
+      const maxScroll = contentHeight.current - layoutHeight.current;
+
+      // Actualizar indicadores con interpolación suave
+      if (scrollPosition > 20 && scrollIndicatorTopAnim._value !== 1) {
+        Animated.timing(scrollIndicatorTopAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      } else if (scrollPosition <= 20 && scrollIndicatorTopAnim._value !== 0) {
+        Animated.timing(scrollIndicatorTopAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+
+      if (scrollPosition < maxScroll - 20 && scrollIndicatorBottomAnim._value !== 1) {
+        Animated.timing(scrollIndicatorBottomAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      } else if (scrollPosition >= maxScroll - 20 && scrollIndicatorBottomAnim._value !== 0) {
+        Animated.timing(scrollIndicatorBottomAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+    });
+
+    return () => {
+      scrollY.removeListener(listenerId);
+    };
+  }, [headerAnim, pulseAnim, footerAnim, glowAnim, scrollY, scrollIndicatorTopAnim, scrollIndicatorBottomAnim]);
 
   // Animar cuando cambia el lastMood
   useEffect(() => {
@@ -81,13 +128,21 @@ export default function Moodformscreen() {
     }
   }, [lastMood, footerScale]);
 
+  const handleContentSizeChange = (width, height) => {
+    contentHeight.current = height;
+  };
+
+  const handleLayout = (event) => {
+    layoutHeight.current = event.nativeEvent.layout.height;
+  };
+
   const moodsje = [
-    { mood: "Feliz", emoji: "😊", color: "#FFD700", gradient: ["#FFD700", "#FFA500"] },
-    { mood: "Triste", emoji: "😢", color: "#4A90E2", gradient: ["#4A90E2", "#357ABD"] },
-    { mood: "Enojado", emoji: "😠", color: "#E74C3C", gradient: ["#E74C3C", "#C0392B"] },
-    { mood: "Ansioso", emoji: "😰", color: "#9B59B6", gradient: ["#9B59B6", "#8E44AD"] },
-    { mood: "Emocionado", emoji: "🤩", color: "#FF6B9D", gradient: ["#FF6B9D", "#C73866"] },
-    { mood: "Cansado", emoji: "😴", color: "#95A5A6", gradient: ["#95A5A6", "#7F8C8D"] }
+    { mood: "Feliz", emoji: "😊", color: Colors.moods.feliz.color, gradient: Colors.moods.feliz.gradient },
+    { mood: "Triste", emoji: "😢", color: Colors.moods.triste.color, gradient: Colors.moods.triste.gradient },
+    { mood: "Enojado", emoji: "😠", color: Colors.moods.enojado.color, gradient: Colors.moods.enojado.gradient },
+    { mood: "Ansioso", emoji: "😰", color: Colors.moods.ansioso.color, gradient: Colors.moods.ansioso.gradient },
+    { mood: "Emocionado", emoji: "🤩", color: Colors.moods.emocionado.color, gradient: Colors.moods.emocionado.gradient },
+    { mood: "Cansado", emoji: "😴", color: Colors.moods.cansado.color, gradient: Colors.moods.cansado.gradient }
   ];
 
   const handleMoodSelect = (item) => {
@@ -193,7 +248,7 @@ export default function Moodformscreen() {
               borderRadius: 20,
               flexDirection: 'row',
               alignItems: 'center',
-              shadowColor: '#000',
+              shadowColor: colors.shadowColor,
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
               shadowRadius: 8,
@@ -223,10 +278,10 @@ export default function Moodformscreen() {
     <LinearGradient 
       start={{x: 0, y: 0}} 
       end={{x: 1, y: 1}} 
-      colors={['#667eea', '#764ba2', '#f093fb']} 
+      colors={colors.primaryGradient} 
       style={{flex: 1, width: '100%'}}
     >
-      <Container className="flex-1" style={Platform.OS === 'android' ? { paddingTop: 40 } : {}}>
+      <Container className="flex-1" style={Platform.OS === 'android' ? { paddingTop: 10 } : {}}>
         {/* Header con animación */}
         <Animated.View
           style={{
@@ -238,11 +293,12 @@ export default function Moodformscreen() {
               }),
             }],
           }}
-          className="items-center mt-8 mb-4"
+          className="items-center mt- mb-4"
         >
           <Animated.Text 
-            className="text-5xl font-bold text-white mb-2" 
+            className="text-4xl font-bold mb-2" 
             style={{ 
+              color: colors.text,
               textShadowColor: 'rgba(0,0,0,0.3)', 
               textShadowOffset: {width: 2, height: 2}, 
               textShadowRadius: 4,
@@ -257,34 +313,119 @@ export default function Moodformscreen() {
             ¿Cómo te sientes?
           </Animated.Text>
           <View >
-            <Text className="text-xl text-white/90 font-medium">Selecciona tu mood</Text>
+            <Text className="text-xl font-medium" style={{ color: colors.textSecondary }}>Selecciona tu mood</Text>
           </View>
         </Animated.View>
 
         {/* Lista de moods con animaciones */}
-        <FlatList
-          data={moodsje}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
-          renderItem={({ item, index }) => <MoodItem item={item} index={index} />}
-          keyExtractor={(item) => item.mood}
-          showsVerticalScrollIndicator={false}
-        />
+        <View style={{ flex: 1, position: 'relative' }}>
+          {/* Indicador de scroll superior */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 40,
+              zIndex: 10,
+              opacity: scrollIndicatorTopAnim,
+              pointerEvents: 'none',
+            }}
+          >
+            <LinearGradient
+              colors={colors.scrollIndicatorGradientTop}
+              style={{ flex: 1, alignItems: 'center', paddingTop: 5 }}
+            >
+              <Animated.View
+                style={{
+                  transform: [{
+                    translateY: scrollIndicatorTopAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [-10, 0],
+                    }),
+                  }],
+                }}
+              >
+                <Text style={{ fontSize: 24, color: colors.scrollIndicatorIcon }}>▲</Text>
+              </Animated.View>
+            </LinearGradient>
+          </Animated.View>
+
+          <Animated.FlatList
+            data={moodsje}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
+            renderItem={({ item, index }) => <MoodItem item={item} index={index} />}
+            keyExtractor={(item) => item.mood}
+            showsVerticalScrollIndicator={false}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: true }
+            )}
+            onContentSizeChange={handleContentSizeChange}
+            onLayout={handleLayout}
+            scrollEventThrottle={16}
+          />
+
+          {/* Indicador de scroll inferior */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 40,
+              zIndex: 10,
+              opacity: scrollIndicatorBottomAnim,
+              pointerEvents: 'none',
+            }}
+          >
+            <LinearGradient
+              colors={colors.scrollIndicatorGradientBottom}
+              style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 5 }}
+            >
+              <Animated.View
+                style={{
+                  transform: [
+                    {
+                      translateY: scrollIndicatorBottomAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [10, 0],
+                      }),
+                    },
+                    {
+                      scale: pulseAnim.interpolate({
+                        inputRange: [1, 1.1],
+                        outputRange: [1, 1.2],
+                      }),
+                    },
+                  ],
+                }}
+              >
+                <Text style={{ fontSize: 24, color: colors.scrollIndicatorIcon }}>▼</Text>
+              </Animated.View>
+            </LinearGradient>
+          </Animated.View>
+        </View>
 
         {/* Footer con último mood */}
         <View
           
-          className="items-center pb-6 px-4"
+          className="items-center pb-6 px-4 mt-4"
         >
           <View 
-            className="bg-white/20 backdrop-blur-lg rounded-3xl px-8 py-4 border-2 border-white/30"
-           
+            className="rounded-3xl px-8 py-4 border-2"
+            style={{
+              backgroundColor: colors.cardBackground,
+              borderColor: colors.cardBorder,
+            }}
           >
-            <Text className="text-lg text-white/80 text-center font-medium">
+            <Text className="text-lg text-center font-medium" style={{ color: colors.textTertiary }}>
               Último estado de ánimo
             </Text>
             <Text 
-              className="text-3xl font-bold text-white text-center mt-1"
-                         >
+              className="text-3xl font-bold text-center mt-1"
+              style={{ color: colors.text }}
+            >
               {lastMood}
             </Text>
             

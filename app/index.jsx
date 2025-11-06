@@ -3,10 +3,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Platform, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 import "../global.css";
 
 export default function Index() {
   const router = useRouter();
+  const { colors } = useTheme();
   const Container = Platform.OS === 'ios' ? SafeAreaView : View;
 
   // Animaciones
@@ -191,7 +193,7 @@ export default function Index() {
         <LinearGradient
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          colors={['#667eea', '#764ba2', '#f093fb']}
+          colors={colors.primaryGradient}
           style={{ 
             flex: 1,
           }}
@@ -323,8 +325,9 @@ export default function Index() {
           }}
         >
           <Text 
-            className="text-8xl font-extralight text-white mb-4 font-Gaegu-Light" 
+            className="text-8xl font-extralight mb-4 font-Gaegu-Light" 
             style={{ 
+              color: colors.text,
               textShadowColor: 'rgba(0,0,0,0.5)', 
               textShadowOffset: {width: 4, height: 4}, 
               textShadowRadius: 15 
@@ -333,8 +336,9 @@ export default function Index() {
             Moodify
           </Text>
           <Animated.Text 
-            className="text-xl text-white/90 font-light tracking-widest font-Gaegu-Regular"
+            className="text-xl font-light tracking-widest font-Gaegu-Regular"
             style={{
+              color: colors.textSecondary,
               textShadowColor: 'rgba(0,0,0,0.3)', 
               textShadowOffset: {width: 2, height: 2}, 
               textShadowRadius: 8,
@@ -355,8 +359,9 @@ export default function Index() {
         >
           {/* Mensaje de bienvenida */}
           <Animated.Text 
-            className="text-3xl font-bold text-white mb-8"
+            className="text-3xl font-bold mb-8"
             style={{
+              color: colors.text,
               textShadowColor: 'rgba(0,0,0,0.2)', 
               textShadowOffset: {width: 1, height: 1}, 
               textShadowRadius: 3,
@@ -376,7 +381,7 @@ export default function Index() {
             <TouchableOpacity 
               className="px-10 py-6 bg-yellow-500 rounded-full bg-gradient-to-br  "
               style={{
-                shadowColor: '#000',
+                shadowColor: colors.shadowColor,
                 shadowOffset: { width: 2, height: 8 },
                 shadowOpacity: 0.3,
                 shadowRadius: 16,
@@ -401,15 +406,18 @@ export default function Index() {
                   outputRange: [30, 0],
                 }),
               }],
+              backgroundColor: colors.cardBackground,
+              borderColor: colors.cardBorder,
             }}
-            className="mt-10 bg-white/20 backdrop-blur-lg rounded-3xl px-8 py-4 border-2 border-white/30"
+            className="mt-10 backdrop-blur-lg rounded-3xl px-8 py-4 border-2"
           >
-            <Text className="font-semibold text-lg text-white/70 text-center mb-2">
+            <Text className="font-semibold text-lg text-center mb-2" style={{ color: colors.textTertiary }}>
               Tu último estado de ánimo:
             </Text>
             <Animated.Text 
-              className="font-bold text-3xl text-white text-center"
+              className="font-bold text-3xl text-center"
               style={{
+                color: colors.text,
                 transform: [{
                   scale: pulseAnim.interpolate({
                     inputRange: [1, 1.05],

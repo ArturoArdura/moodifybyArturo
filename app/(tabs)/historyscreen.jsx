@@ -3,9 +3,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Platform, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { LineChart } from 'react-native-chart-kit';
+import { useTheme } from '../../context/ThemeContext';
 import "../../global.css";
 
 export default function HistoryScreen() {
+  const { colors, theme } = useTheme();
   const [selectedDay, setSelectedDay] = useState(null);
   
   // Animaciones
@@ -57,7 +59,7 @@ export default function HistoryScreen() {
         }),
       ])
     ).start();
-  }, []);
+  }, [buttonAnim, buttonPulse, calendarAnim, chartAnim, headerAnim]);
 
   // Datos de ejemplo para el calendario (fechas con moods)
   const markedDates = {
@@ -82,7 +84,7 @@ export default function HistoryScreen() {
     <LinearGradient 
       start={{x: 0, y: 0}} 
       end={{x: 1, y: 1}} 
-      colors={['#667eea', '#764ba2', '#f093fb']} 
+      colors={colors.primaryGradient} 
       style={{flex: 1, width: '100%'}}
     >
       <Container className="flex-1" style={Platform.OS === 'android' ? { paddingTop: 40 } : {}}>
@@ -103,10 +105,10 @@ export default function HistoryScreen() {
             }}
             className="mb-6"
           >
-            <Text className="text-4xl font-bold text-white mb-2" style={{ textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: {width: 2, height: 2}, textShadowRadius: 4 }}>
+            <Text className="text-4xl font-bold mb-2" style={{ color: colors.text, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: {width: 2, height: 2}, textShadowRadius: 4 }}>
               Tu Historia
             </Text>
-            <Text className="text-lg text-white/80">Revisa tu progreso emocional</Text>
+            <Text className="text-lg" style={{ color: colors.textTertiary }}>Revisa tu progreso emocional</Text>
           </Animated.View>
 
           {/* Calendario con animación */}
@@ -116,14 +118,15 @@ export default function HistoryScreen() {
               transform: [{ scale: calendarAnim }],
             }}
           >
-            <View className="bg-white/95 backdrop-blur-lg rounded-3xl p-4 mb-6" style={{
-              shadowColor: '#000',
+            <View className="rounded-3xl p-4 mb-6" style={{
+              backgroundColor: theme === 'dark' ? 'rgba(30, 30, 46, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+              shadowColor: colors.shadowColor,
               shadowOffset: { width: 0, height: 8 },
               shadowOpacity: 0.3,
               shadowRadius: 16,
               elevation: 10,
             }}>
-              <Text className="text-2xl font-bold mb-3 text-gray-800">📅 Calendario de Moods</Text>
+              <Text className="text-2xl font-bold mb-3" style={{ color: theme === 'dark' ? '#e2e8f0' : '#1f2937' }}>📅 Calendario de Moods</Text>
               <Calendar
                 markedDates={markedDates}
                 onDayPress={(day) => {
@@ -133,16 +136,16 @@ export default function HistoryScreen() {
                 theme={{
                   backgroundColor: 'transparent',
                   calendarBackground: 'transparent',
-                  textSectionTitleColor: '#8B5CF6',
-                  selectedDayBackgroundColor: '#8B5CF6',
+                  textSectionTitleColor: theme === 'dark' ? '#a78bfa' : '#8B5CF6',
+                  selectedDayBackgroundColor: theme === 'dark' ? '#7c3aed' : '#8B5CF6',
                   selectedDayTextColor: '#ffffff',
                   todayTextColor: '#F59E0B',
-                  dayTextColor: '#2d3748',
-                  textDisabledColor: '#d1d5db',
-                  dotColor: '#8B5CF6',
+                  dayTextColor: theme === 'dark' ? '#e2e8f0' : '#2d3748',
+                  textDisabledColor: theme === 'dark' ? '#4a5568' : '#d1d5db',
+                  dotColor: theme === 'dark' ? '#a78bfa' : '#8B5CF6',
                   selectedDotColor: '#ffffff',
-                  arrowColor: '#8B5CF6',
-                  monthTextColor: '#1f2937',
+                  arrowColor: theme === 'dark' ? '#a78bfa' : '#8B5CF6',
+                  monthTextColor: theme === 'dark' ? '#e2e8f0' : '#1f2937',
                   textDayFontWeight: '500',
                   textMonthFontWeight: 'bold',
                   textDayHeaderFontWeight: '600',
@@ -169,38 +172,39 @@ export default function HistoryScreen() {
               }],
             }}
           >
-            <View className="bg-white/95 backdrop-blur-lg rounded-3xl p-4 mb-6" style={{
-              shadowColor: '#000',
+            <View className="rounded-3xl p-4 mb-6" style={{
+              backgroundColor: theme === 'dark' ? 'rgba(30, 30, 46, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+              shadowColor: colors.shadowColor,
               shadowOffset: { width: 0, height: 8 },
               shadowOpacity: 0.3,
               shadowRadius: 16,
               elevation: 10,
             }}>
-              <Text className="text-2xl font-bold mb-3 text-gray-800">📊 Tendencia Semanal</Text>
+              <Text className="text-2xl font-bold mb-3" style={{ color: theme === 'dark' ? '#e2e8f0' : '#1f2937' }}>📊 Tendencia Semanal</Text>
               
               <LineChart
                 data={chartData}
                 width={Dimensions.get('window').width - 72}
                 height={220}
                 chartConfig={{
-                  backgroundColor: '#ffffff',
-                  backgroundGradientFrom: '#f8f9ff',
-                  backgroundGradientTo: '#e0e7ff',
+                  backgroundColor: theme === 'dark' ? '#1a1a2e' : '#ffffff',
+                  backgroundGradientFrom: theme === 'dark' ? '#16213e' : '#f8f9ff',
+                  backgroundGradientTo: theme === 'dark' ? '#0f3460' : '#e0e7ff',
                   decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(139, 92, 246, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(107, 114, 128, ${opacity})`,
+                  color: (opacity = 1) => theme === 'dark' ? `rgba(167, 139, 250, ${opacity})` : `rgba(139, 92, 246, ${opacity})`,
+                  labelColor: (opacity = 1) => theme === 'dark' ? `rgba(226, 232, 240, ${opacity})` : `rgba(107, 114, 128, ${opacity})`,
                   style: {
                     borderRadius: 16
                   },
                   propsForDots: {
                     r: "6",
                     strokeWidth: "3",
-                    stroke: "#8B5CF6",
-                    fill: "#ffffff"
+                    stroke: theme === 'dark' ? '#a78bfa' : '#8B5CF6',
+                    fill: theme === 'dark' ? '#1a1a2e' : '#ffffff'
                   },
                   propsForBackgroundLines: {
                     strokeDasharray: "", // solid background lines
-                    stroke: "#e5e7eb",
+                    stroke: theme === 'dark' ? '#374151' : '#e5e7eb',
                     strokeWidth: 1
                   }
                 }}
@@ -220,15 +224,15 @@ export default function HistoryScreen() {
               <View className="flex-row justify-around mt-4 px-2">
                 <View className="items-center">
                   <View className="w-3 h-3 rounded-full bg-red-500 mb-1" />
-                  <Text className="text-xs text-gray-600">Bajo</Text>
+                  <Text className="text-xs" style={{ color: theme === 'dark' ? '#94a3b8' : '#4b5563' }}>Bajo</Text>
                 </View>
                 <View className="items-center">
                   <View className="w-3 h-3 rounded-full bg-yellow-500 mb-1" />
-                  <Text className="text-xs text-gray-600">Medio</Text>
+                  <Text className="text-xs" style={{ color: theme === 'dark' ? '#94a3b8' : '#4b5563' }}>Medio</Text>
                 </View>
                 <View className="items-center">
                   <View className="w-3 h-3 rounded-full bg-green-500 mb-1" />
-                  <Text className="text-xs text-gray-600">Alto</Text>
+                  <Text className="text-xs" style={{ color: theme === 'dark' ? '#94a3b8' : '#4b5563' }}>Alto</Text>
                 </View>
               </View>
             </View>

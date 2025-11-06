@@ -1,17 +1,29 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function RootLayout() {
+  const { theme } = useTheme();
+  
   return (
     <>
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarStyle: {
+          backgroundColor: theme === 'dark' ? '#1a1a2e' : '#ffffff',
+          borderTopColor: theme === 'dark' ? '#374151' : '#e5e7eb',
+        },
+        tabBarActiveTintColor: theme === 'dark' ? '#a78bfa' : '#667eea',
+        tabBarInactiveTintColor: theme === 'dark' ? '#6b7280' : '#9ca3af',
+      }}
+    >
       <Tabs.Screen
         name="moodformscreen"
         options={{
           headerShown: true,
           headerStyle: {
-            backgroundColor: '#667eea',
+            backgroundColor: theme === 'dark' ? '#1a1a2e' : '#667eea',
           },
           headerTintColor: '#fff',
           headerTitleStyle: {
@@ -32,7 +44,7 @@ export default function RootLayout() {
         options={{
           headerShown: true,
           headerStyle: {
-            backgroundColor: '#667eea',
+            backgroundColor: theme === 'dark' ? '#1a1a2e' : '#667eea',
           },
           headerTintColor: '#fff',
           headerTitleStyle: {
@@ -49,7 +61,7 @@ export default function RootLayout() {
         }}
       />
     </Tabs>
-    <StatusBar style="dark" />
+    <StatusBar style="auto" />
     </>
   )
 }

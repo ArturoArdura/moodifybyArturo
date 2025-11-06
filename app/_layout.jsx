@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { ThemeProvider } from '../context/ThemeContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,22 +28,22 @@ useEffect(() => {
 
   
   return (
-    <>
-    <Stack>
-      <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="(tabs)"
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack>
-    <StatusBar style="dark" />
-    </>
+    <ThemeProvider>
+      <Stack>
+        <Stack.Screen
+          name="index"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
+      <StatusBar style="auto" />
+    </ThemeProvider>
   )
 }
